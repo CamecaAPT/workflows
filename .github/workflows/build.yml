@@ -1,0 +1,61 @@
+# Reusable workflow for building
+name: Build
+
+on:
+  # Job is only triggered by other repository caller workflows
+  workflow_call:
+    inputs:
+      build-configuration:
+        description: 'The build configuration for the project'
+        required: true
+        type: string
+      version:
+        description: 'SemVer2 version string. Do not include a leading "v" prefix. (e.g. 1.0.0-beta.0)'
+        required: true
+        type: string
+
+jobs:
+  build:
+    # The type of runner that the job will run on
+    runs-on: windows-latest
+  
+    # Job scoped environment variables
+    env:
+      BUILD_CONFIGURATION: ${{ inputs.build-configuration }}
+      VERSION: ${{ inputs.version }}
+      BUILD_OUTPUT_PATH: ./.artifacts/bin/
+      
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          
+      # Setup .NET
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.x
+          
+      # Restore dependencies
+      - name: Restore dependencies
+        run: dotnet restore
+        
+      # Build
+      - name: Build
+        run: >
+          dotnet build
+          --no-restore
+          --configuration $env:BUILD_CONFIGURATION
+          --property:Version=$env:VERSION
+          --property:OutputPath=$env:BUILD_OUTPUT_PATH
+          --nologo
+      
+      # Upload artifacts
+      - name: Upload artifacts
+        uses: actions/upload-artifact@master
+        with:
+          name: build-artifact
+          path: $env:BUILD_OUTPUT_PATH
+          retention-days: 5
