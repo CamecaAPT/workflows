@@ -1,0 +1,66 @@
+# Reusable workflow for packaging
+name: Pack
+
+on:
+  workflow_call:
+    inputs:
+      build-configuration:
+        description: 'The build configuration for the project'
+        required: true
+        type: string
+      version:
+        description: 'SemVer2 version string. Do not include a leading "v" prefix. (e.g. 1.0.0-beta.0)'
+        required: true
+        type: string
+    
+jobs:
+  pack:
+    # The type of runner that the job will run on
+    runs-on: windows-latest
+    
+    # Job scoped environment variables
+    env:
+      BUILD_CONFIGURATION: ${{ inputs.build-configuration }}
+      VERSION: ${{ inputs.version }}
+      BUILD_OUTPUT_PATH: ./.artifacts/bin/
+      PACKAGE_OUTPUT_PATH: ./.artifacts/package/
+      
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          
+      # Setup .NET
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.x
+      
+      # Download artifacts
+      - name: Download artifacts
+        uses: actions/download-artifact@master
+        with:
+          name: build-artifact
+          path: $env:BUILD_OUTPUT_PATH
+      
+      # Create the package
+      - name: Pack
+        run: >
+          dotnet pack
+          --no-build
+          --include-symbols
+          --configuration $env:BUILD_CONFIGURATION
+          --property:Version=$env:VERSION
+          --property:OutputPath=$env:BUILD_OUTPUT_PATH
+          --property:PackageOutputPath=$env:PACKAGE_OUTPUT_PATH
+      
+      # Upload artifacts
+      - name: Upload artifacts
+        uses: actions/upload-artifact@master
+        with:
+          name: pack-artifact
+          path: $env:PACKAGE_OUTPUT_PATH
+          retention-days: 5
+      
