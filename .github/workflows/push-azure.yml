@@ -1,0 +1,51 @@
+# Reusable workflow for pushing package artifacts to Azure Artifacts NuGet feed
+name: Push (Azure)
+
+on:
+  workflow_call:
+    inputs:
+      artifact-feed-url:
+        description: 'Regirstry URL for the Azure Artifacts feed'
+        required: true
+        type: string
+    secrets:
+      azure-pat:
+        description: 'Personal Access Token with Package (Read/Write) permissions'
+        required: true
+    
+jobs:
+  pack:
+    # The type of runner that the job will run on
+    runs-on: windows-latest
+      
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:          
+      # Setup .NET
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.x
+          source-url: ${{ env.AZURE_ARTIFACTS_FEED_URL }}
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.AZURE_DEVOPS_TOKEN }} 
+      
+      # Download artifacts to current directory
+      - name: Download artifacts
+        uses: actions/download-artifact@master
+        with:
+          name: build-artifact
+      
+      # Push the package and symbols to the Azure Artifacts NuGet feed
+      - name: Push (Package)
+        run: >
+          dotnet nuget push
+          *.nupkg
+          --api-key AzureArtifacts
+          --skip-duplicate
+          
+      - name: Push (Symbols Package)
+        run: >
+          dotnet nuget push
+          *.snupkg
+          --api-key AzureArtifacts
+          --skip-duplicate
