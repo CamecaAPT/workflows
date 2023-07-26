@@ -18,13 +18,6 @@ jobs:
     # The type of runner that the job will run on
     runs-on: windows-latest
     
-    # Job scoped environment variables
-    env:
-      BUILD_CONFIGURATION: ${{ inputs.build-configuration }}
-      VERSION: ${{ inputs.version }}
-      BUILD_OUTPUT_PATH: ./.artifacts/bin/
-      PACKAGE_OUTPUT_PATH: ./.artifacts/package/
-      
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -43,7 +36,7 @@ jobs:
         uses: actions/download-artifact@master
         with:
           name: build-artifact
-          path: $env:BUILD_OUTPUT_PATH
+          path: ./.artifacts/bin/
       
       # Create the package
       - name: Pack
@@ -51,16 +44,16 @@ jobs:
           dotnet pack
           --no-build
           --include-symbols
-          --configuration $env:BUILD_CONFIGURATION
-          --property:Version=$env:VERSION
-          --property:OutputPath=$env:BUILD_OUTPUT_PATH
-          --property:PackageOutputPath=$env:PACKAGE_OUTPUT_PATH
+          --configuration ${{ inputs.build-configuration }}
+          --property:Version=${{ inputs.version }}
+          --property:OutputPath=./.artifacts/bin/
+          --property:PackageOutputPath=./.artifacts/pack/
       
       # Upload artifacts
       - name: Upload artifacts
         uses: actions/upload-artifact@master
         with:
           name: pack-artifact
-          path: $env:PACKAGE_OUTPUT_PATH
+          path: ./.artifacts/pack/
           retention-days: 5
       
