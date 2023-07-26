@@ -49,7 +49,7 @@ jobs:
           --no-restore
           --configuration ${{ inputs.build-configuration }}
           --property:Version=${{ inputs.version }}
-          --property:OutputPath=./.artifacts/bin/
+          --property:OutputPath=.artifacts/bin/
           --nologo
       
       # Upload artifacts
@@ -57,5 +57,5 @@ jobs:
         uses: actions/upload-artifact@master
         with:
           name: build-artifact
-          path: ./.artifacts/bin/
+          path: .artifacts/bin/
           retention-days: 5
