@@ -90,10 +90,12 @@ jobs:
       
       # Test (if present)
       - name: Test
+        shell: bash
         run: >
           dotnet test
+          **/*.csproj
           --no-build
-          --configuration $env:BUILD_CONFIGURATION
+          --configuration $BUILD_CONFIGURATION
           --verbosity normal
           --nologo
       
