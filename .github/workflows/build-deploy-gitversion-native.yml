@@ -101,12 +101,14 @@ jobs:
       
       # Create the preview package
       - name: Pack
+        shell: bash
         run: >
           dotnet pack
+          **/*.csproj
           --no-build
-          --configuration $env:BUILD_CONFIGURATION
+          --configuration $BUILD_CONFIGURATION
           --include-symbols
-          /p:Version=$env:GitVersion_SemVer
+          /p:Version=$GitVersion_SemVer
           --output .
 
       - name: Push (Package)
