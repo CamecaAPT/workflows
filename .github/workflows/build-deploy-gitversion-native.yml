@@ -19,6 +19,11 @@ on:
         required: false
         default: false
         type: boolean
+      package-csproj:
+        description: "Path to the csproj file to be packaged relative to the solution root"
+        required: false
+        default: ''
+        type: string
     secrets:
       azure-package-read-write:
         required: true
@@ -101,14 +106,13 @@ jobs:
       
       # Create the preview package
       - name: Pack
-        shell: bash
         run: >
           dotnet pack
-          **/*.csproj
+          ${{ inputs.package-csproj }}
           --no-build
-          --configuration $BUILD_CONFIGURATION
+          --configuration $env:BUILD_CONFIGURATION
           --include-symbols
-          /p:Version=$GitVersion_SemVer
+          /p:Version=$env:GitVersion_SemVer
           --output .
 
       - name: Push (Package)
