@@ -6,6 +6,10 @@ name: Build, GitVersion, Test, Azure Artifacts Deploy
 on:
   workflow_call:
     inputs:
+      platform:
+        description: "Target processor architecture"
+        required: true
+        type: string
       build-configuration:
         required: true
         type: string
@@ -90,7 +94,7 @@ jobs:
           msbuild
           /t:Build
           /p:Configuration=$env:BUILD_CONFIGURATION
-          /p:Platform=x64
+          /p:Platform=${{ inputs.platform }}
           /p:Version=$env:GitVersion_SemVer
       
       # Test (if present)
@@ -113,6 +117,7 @@ jobs:
           --configuration $env:BUILD_CONFIGURATION
           --include-symbols
           /p:Version=$env:GitVersion_SemVer
+          /p:Platform=${{ inputs.platform }}
           --output .
 
       - name: Push (Package)
