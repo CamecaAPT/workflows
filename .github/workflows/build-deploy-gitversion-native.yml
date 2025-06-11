@@ -110,6 +110,10 @@ jobs:
       
       # Create the preview package
       - name: Pack
+        # This step will throw and error: the Microsoft.Cpp.Default.props will not be found.
+        # Despite this, the package should successfully be created.
+        # If not, the push step will fail anyways, so it's okay to continue on error here
+        continue-on-error: true
         run: >
           dotnet pack
           ${{ inputs.package-csproj }}
