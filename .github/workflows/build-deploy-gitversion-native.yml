@@ -118,6 +118,7 @@ jobs:
           --include-symbols
           /p:Version=$env:GitVersion_SemVer
           /p:Platform=${{ inputs.platform }}
+          /p:SkipNativeReferences=true
           --output .
 
       - name: Push (Package)
