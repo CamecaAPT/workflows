@@ -138,3 +138,17 @@ jobs:
           *.snupkg
           --api-key az
           --skip-duplicate
+
+      - name: Generate Build Summary
+        shell: pwsh
+        run: |
+          $commit = "${{ github.sha }}"
+          $summary = @"
+          ## Build Summary
+          - **Version**: $($env:GitVersion_SemVer)
+          - **Timestamp**: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+          - **Commit**: ${{ github.sha }}
+          - **Build Configuration**: ${{ inputs.build-configuration }}
+          - **Triggered by**: ${{ github.actor }}
+          "@
+          $summary | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
